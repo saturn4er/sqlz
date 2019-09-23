@@ -36,7 +36,7 @@ definitely usable. API may change, though I'm not currently planning on doing so
 To install sqlz globally:
 
 ```go
-go get -u github.com/ido50/sqlz
+go get -u github.com/saturn4er/sqlz
 ```
 
 Alternatively, use your preferred Go depedency manager to vendor sqlz into your projects.
@@ -54,7 +54,7 @@ package main
 import (
     "fmt"
     "database/sql"
-    "github.com/ido50/sqlz"
+    "github.com/saturn4er/sqlz"
 )
 
 func main() {

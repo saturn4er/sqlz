@@ -1,4 +1,4 @@
-module github.com/ido50/sqlz
+module github.com/saturn4er/sqlz
 
 go 1.13
 
