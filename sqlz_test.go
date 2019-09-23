@@ -3,7 +3,7 @@ package sqlz
 import (
 	"testing"
 
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
+	"github.com/DATA-DOG/go-sqlmock"
 )
 
 type test struct {

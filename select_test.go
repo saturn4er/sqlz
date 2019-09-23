@@ -50,7 +50,7 @@ func TestSelect(t *testing.T) {
 				"SELECT a.id, a.value FROM table a INNER JOIN (SELECT id, MAX(value) value FROM table GROUP BY id) b ON a.id = b.id WHERE a.id = ?",
 				[]interface{}{1},
 			},
-			
+
 			test{
 				"select with array comparisons",
 				dbz.Select("*").From("table").Where(EqAny("array_col", 3), GtAll("other_array_col", 1), NeAny("yet_another_col", Indirect("NOW()"))),
@@ -113,10 +113,10 @@ func TestSelect(t *testing.T) {
 			test{
 				"select with an inner lateral join",
 				dbz.Select("a.id, a.value").From("table a").Where(Eq("a.id", 1)).InnerLateralJoin(
-						dbz.Select("id, MAX(value) value").From("table").GroupBy("id"),
-						"b",
-						SQLCond("True"),
-						),
+					dbz.Select("id, MAX(value) value").From("table").GroupBy("id"),
+					"b",
+					SQLCond("True"),
+				),
 				"SELECT a.id, a.value FROM table a INNER JOIN LATERAL (SELECT id, MAX(value) value FROM table GROUP BY id) b ON True WHERE a.id = ?",
 				[]interface{}{1},
 			},
@@ -129,6 +129,12 @@ func TestSelect(t *testing.T) {
 				),
 				"SELECT a.id, a.value FROM table a RIGHT JOIN LATERAL (SELECT count FROM table WHERE a.value > ?) counts ON a.id = b.id WHERE a.id = ?",
 				[]interface{}{0, 1},
+			},
+			test{
+				"multiple select sources",
+				dbz.Select("a").From("a", "hello as world"),
+				"SELECT a FROM a, hello as world",
+				[]interface{}{},
 			},
 		}
 	})

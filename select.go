@@ -50,7 +50,7 @@ type SelectStmt struct {
 	IsDistinct      bool
 	DistinctColumns []string
 	Columns         []string
-	Table           string
+	Sources         []string
 	Joins           []JoinClause
 	Conditions      []WhereCondition
 	Ordering        []SQLStmt
@@ -60,7 +60,7 @@ type SelectStmt struct {
 	LimitTo         int64
 	OffsetFrom      int64
 	OffsetRows      int64
-	orderWithNulls orderWithNulls
+	orderWithNulls  orderWithNulls
 	queryer         Queryer
 }
 
@@ -124,7 +124,7 @@ type OrderColumn struct {
 
 type orderWithNulls struct {
 	Enabled bool
-	First bool
+	First   bool
 }
 
 // ToSQL generates SQL for an OrderColumn
@@ -156,8 +156,8 @@ func Desc(col string) OrderColumn {
 // Select("one", "two t", "MAX(three) maxThree")
 func (db *DB) Select(cols ...string) *SelectStmt {
 	return &SelectStmt{
-		Columns: append([]string{}, cols...),
-		queryer: db.DB,
+		Columns:  append([]string{}, cols...),
+		queryer:  db.DB,
 		Statment: &Statment{db.ErrHandlers},
 	}
 }
@@ -168,8 +168,8 @@ func (db *DB) Select(cols ...string) *SelectStmt {
 // Select("one", "two t", "MAX(three) maxThree")
 func (tx *Tx) Select(cols ...string) *SelectStmt {
 	return &SelectStmt{
-		Columns: append([]string{}, cols...),
-		queryer: tx.Tx,
+		Columns:  append([]string{}, cols...),
+		queryer:  tx.Tx,
 		Statment: &Statment{tx.ErrHandlers},
 	}
 }
@@ -183,8 +183,8 @@ func (stmt *SelectStmt) Distinct(cols ...string) *SelectStmt {
 }
 
 // From sets the table to select from
-func (stmt *SelectStmt) From(table string) *SelectStmt {
-	stmt.Table = table
+func (stmt *SelectStmt) From(sources ...string) *SelectStmt {
+	stmt.Sources = sources
 	return stmt
 }
 
@@ -251,18 +251,15 @@ func (stmt *SelectStmt) FullJoinRS(rs *SelectStmt, as string, conds ...WhereCond
 	return stmt.Join(FullJoin, as, rs, conds...)
 }
 
-
-func (stmt *SelectStmt) LeftLateralJoin(rs *SelectStmt, as string, conds ...WhereCondition) *SelectStmt{
+func (stmt *SelectStmt) LeftLateralJoin(rs *SelectStmt, as string, conds ...WhereCondition) *SelectStmt {
 	return stmt.Join(LeftLateralJoin, as, rs, conds...)
 }
 
-
-func (stmt *SelectStmt) RightLateralJoin(rs *SelectStmt, as string, conds ...WhereCondition) *SelectStmt{
+func (stmt *SelectStmt) RightLateralJoin(rs *SelectStmt, as string, conds ...WhereCondition) *SelectStmt {
 	return stmt.Join(RightLateralJoin, as, rs, conds...)
 }
 
-
-func (stmt *SelectStmt) InnerLateralJoin(rs *SelectStmt, as string, conds ...WhereCondition) *SelectStmt{
+func (stmt *SelectStmt) InnerLateralJoin(rs *SelectStmt, as string, conds ...WhereCondition) *SelectStmt {
 	return stmt.Join(InnerLateralJoin, as, rs, conds...)
 }
 
@@ -372,7 +369,7 @@ func (stmt *SelectStmt) ToSQL(rebind bool) (asSQL string, bindings []interface{}
 		clauses = append(clauses, strings.Join(stmt.Columns, ", "))
 	}
 
-	clauses = append(clauses, "FROM "+stmt.Table)
+	clauses = append(clauses, "FROM "+strings.Join(stmt.Sources, ", "))
 
 	for _, join := range stmt.Joins {
 		onClause, joinBindings := parseConditions(join.Conditions)
