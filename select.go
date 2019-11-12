@@ -605,3 +605,13 @@ func (stmt *SelectStmt) GetAllAsRows() (rows *sqlx.Rows, err error) {
 	stmt.HandlerError(err)
 	return rows, err
 }
+
+// GetAllAsRowsContext executes the SELECT statement and returns an sqlx.Rows object
+// to use for iteration. It is the caller's responsibility to close the cursor
+// with Close().
+func (stmt *SelectStmt) GetAllAsRowsContext(ctx context.Context) (rows *sqlx.Rows, err error) {
+	asSQL, bindings := stmt.ToSQL(true)
+	rows, err = stmt.queryer.QueryxContext(ctx, asSQL, bindings...)
+	stmt.HandlerError(err)
+	return rows, err
+}
